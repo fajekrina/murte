@@ -1,0 +1,33 @@
+# PR auto-labels by touched path (actions/labeler v5 syntax).
+core:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/MurteCore/**"
+          - "package.json"
+
+gallery:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/MurteGallery/**"
+
+figma:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "figma-plugin/**"
+
+tests:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "tests/**"
+
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*.md"
+          - "docs/**"
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".github/**"
+          - "scripts/**"

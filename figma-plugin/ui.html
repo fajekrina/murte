@@ -1,0 +1,102 @@
+<style>
+  body {
+    font: 12px -apple-system, "Segoe UI", sans-serif;
+    margin: 0;
+    padding: 12px;
+    color: var(--figma-color-text, #000);
+    background: var(--figma-color-bg, #fff);
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 24px);
+    box-sizing: border-box;
+  }
+  .embed {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  #status {
+    min-height: 16px;
+    margin-bottom: 8px;
+    white-space: pre-wrap;
+  }
+  #status.warn { color: var(--figma-color-text-warning, #a05a00); }
+  #status.error { color: var(--figma-color-text-danger, #b3261e); }
+  textarea {
+    flex: 1;
+    width: 100%;
+    resize: none;
+    box-sizing: border-box;
+    font-family: "SF Mono", ui-monospace, Menlo, monospace;
+    font-size: 11px;
+    border: 1px solid var(--figma-color-border, #ccc);
+    border-radius: 4px;
+    padding: 8px;
+    background: var(--figma-color-bg-secondary, #f5f5f5);
+    color: inherit;
+  }
+  .row {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  button {
+    flex: 1;
+    padding: 8px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    background: var(--figma-color-bg-brand, #0d99ff);
+    color: var(--figma-color-text-onbrand, #fff);
+  }
+  button.secondary {
+    background: var(--figma-color-bg-secondary, #e5e5e5);
+    color: var(--figma-color-text, #000);
+  }
+</style>
+
+<label class="embed"><input type="checkbox" id="embed"> Embed images (larger JSON, pixel-accurate preview)</label>
+<div id="status"></div>
+<textarea id="json" readonly placeholder="Select a frame to export its Murte JSON."></textarea>
+<div class="row">
+  <button id="copy">Copy JSON</button>
+  <button id="close" class="secondary">Close</button>
+</div>
+
+<script>
+  const jsonEl = document.getElementById("json");
+  const statusEl = document.getElementById("status");
+
+  onmessage = (event) => {
+    const message = event.data.pluginMessage;
+    if (!message) return;
+
+    if (message.error) {
+      jsonEl.value = "";
+      statusEl.className = "error";
+      statusEl.textContent = message.error;
+      return;
+    }
+
+    jsonEl.value = message.json;
+    if (message.warnings && message.warnings.length > 0) {
+      statusEl.className = "warn";
+      statusEl.textContent = message.warnings.join("\n");
+    } else {
+      statusEl.className = "";
+      statusEl.textContent = "";
+    }
+  };
+
+  document.getElementById("copy").onclick = () => {
+    jsonEl.select();
+    document.execCommand("copy");
+  };
+  document.getElementById("close").onclick = () => {
+    parent.postMessage({ pluginMessage: { type: "close" } }, "*");
+  };
+  document.getElementById("embed").onchange = (event) => {
+    parent.postMessage({ pluginMessage: { type: "embed", value: event.target.checked } }, "*");
+  };
+</script>

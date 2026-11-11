@@ -1,0 +1,26 @@
+name: schema-lint
+
+on:
+  push:
+    paths:
+      - "docs/murte.schema.json"
+      - "docs/fixtures/**"
+      - "scripts/lint_schema.py"
+      - ".github/workflows/schema-lint.yml"
+  pull_request:
+    paths:
+      - "docs/murte.schema.json"
+      - "docs/fixtures/**"
+      - "scripts/lint_schema.py"
+      - ".github/workflows/schema-lint.yml"
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - run: pip install "jsonschema>=4.21"
+      - run: python scripts/lint_schema.py

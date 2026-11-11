@@ -1,0 +1,21 @@
+Murte
+Copyright 2026 fajekrina
+
+This product is a web (TypeScript + DOM) port of Murti, a SwiftUI server-driven UI
+framework:
+
+  Murti — https://github.com/iQbalADR/murti
+  Copyright 2026 iQbalADR
+  Licensed under the Apache License, Version 2.0
+
+Murte reproduces Murti's architecture, public API shape, payload schema, fixtures,
+tests, documentation, and Figma plugin, rewritten for the web platform:
+
+  - Sources/MurtiCore, MurtiBuilder, MurtiGen, MurtiStudio, MurtiGallery (Swift)
+    were rewritten in TypeScript as src/MurteCore, MurteBuilder, MurteGen,
+    MurteStudio, MurteGallery, rendering to the DOM instead of SwiftUI.
+  - The Swift test suites were ported to Vitest under tests/.
+  - docs/murti.schema.json was carried over as docs/murte.schema.json (same
+    structural contract; titles and ids renamed). The docs/fixtures are unchanged.
+  - figma-plugin/ was carried over with Murti names changed to Murte.
+  - Documentation was adapted from Murti's docs for the web platform.

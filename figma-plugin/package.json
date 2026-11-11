@@ -1,0 +1,21 @@
+{
+  "name": "murte-figma-export",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Figma plugin that exports the selected frame as validated Murte SDUI JSON.",
+  "license": "Apache-2.0",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test test/mapping.test.ts",
+    "build": "esbuild src/code.ts --bundle --format=iife --target=es2017 --outfile=code.js"
+  },
+  "devDependencies": {
+    "@figma/plugin-typings": "^1.100.0",
+    "@types/node": "^20.14.0",
+    "ajv": "^8.17.1",
+    "esbuild": "^0.24.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}

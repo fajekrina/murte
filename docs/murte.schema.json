@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/fajekrina/murte/main/docs/murte.schema.json",
+  "title": "Murte SDUI Payload (v1)",
+  "description": "Authoritative STRUCTURAL schema for Murte (and Murti) server-driven UI payloads. It enforces shape, closed vocabularies, and per-field bounds only. Tree depth, total node count, action-chain depth, and semantic resolution (a type/request/screen actually exists) are enforced by the client validator — see docs/schema.md.",
+  "oneOf": [
+    { "$ref": "#/$defs/envelope" },
+    { "$ref": "#/$defs/payload" }
+  ],
+  "$defs": {
+    "envelope": {
+      "type": "object",
+      "description": "Production transport wrapper. The client verifies the signature (and optionally decrypts) BEFORE trusting the payload.",
+      "required": ["schemaVersion", "alg", "payload", "signature"],
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "$ref": "#/$defs/schemaVersion" },
+        "alg": {
+          "enum": ["ed25519", "es256"],
+          "description": "Signature algorithm. The app verifies with its embedded public key."
+        },
+        "enc": {
+          "enum": ["hybrid-x25519-aesgcm"],
+          "description": "Present ONLY when the payload is encrypted (hybrid/envelope encryption). Absent means signed-but-plaintext."
+        },
+        "payload": {
+          "type": "string",
+          "contentEncoding": "base64",
+          "maxLength": 1048576,
+          "description": "Base64 of the UTF-8 payload JSON, or of the ciphertext when 'enc' is present. ~1 MiB cap."
+        },
+        "signature": {
+          "type": "string",
+          "contentEncoding": "base64",
+          "maxLength": 1024,
+          "description": "Base64 signature over the raw (pre-base64) 'payload' bytes."
+        }
+      }
+    },
+    "payload": {
+      "type": "object",
+      "description": "Plaintext screen tree — inside the envelope, or posted directly during development.",
+      "required": ["schemaVersion", "screen"],
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "$ref": "#/$defs/schemaVersion" },
+        "screen": { "$ref": "#/$defs/screen" }
+      }
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+$",
+      "description": "MAJOR.MINOR. Consumers match on MAJOR; an unknown MINOR renders-what-it-can (forward-compatible)."
+    },
+    "screen": {
+      "type": "object",
+      "required": ["key", "root"],
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "$ref": "#/$defs/identifier",
+          "description": "Stable screen key. Must resolve in the ScreenFactory (a semantic check the client performs)."
+        },
+        "root": { "$ref": "#/$defs/node" }
+      }
+    },
+    "node": {
+      "type": "object",
+      "description": "A MurteNode. 'type' is an OPEN vocabulary (the component registry is extensible); the client's semantic layer confirms it resolves, otherwise the Null-Object fallback renders a placeholder.",
+      "required": ["type"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "$ref": "#/$defs/typeName" },
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "description": "Optional stable identity for rendering. Synthesized if absent."
+        },
+        "props": { "$ref": "#/$defs/props" },
+        "children": {
+          "type": "array",
+          "maxItems": 256,
+          "items": { "$ref": "#/$defs/node" }
+        },
+        "action": { "$ref": "#/$defs/action" }
+      }
+    },
+    "props": {
+      "type": "object",
+      "description": "A component's props bag. OPEN by design: unknown keys are ignored (forward-compatible). String values are length-bounded via #/$defs/value.",
+      "maxProperties": 64,
+      "additionalProperties": { "$ref": "#/$defs/value" }
+    },
+    "value": {
+      "description": "A MurteValue — any JSON scalar/array/object. Strings are length-bounded wherever they appear.",
+      "anyOf": [
+        { "type": "string", "maxLength": 4096 },
+        { "type": "number" },
+        { "type": "boolean" },
+        { "type": "null" },
+        { "type": "array", "maxItems": 512, "items": { "$ref": "#/$defs/value" } },
+        { "type": "object", "maxProperties": 64, "additionalProperties": { "$ref": "#/$defs/value" } }
+      ]
+    },
+    "action": {
+      "type": "object",
+      "description": "A MurteActionSpec. 'type' is a CLOSED vocabulary. onSuccess/onError form a bounded LINEAR chain (max depth enforced by the client validator). Targets are named references (screen key / named request / named link) — never raw URLs.",
+      "required": ["type"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "enum": ["navigate", "api", "dismiss", "refresh", "openURL"] },
+        "screen": {
+          "$ref": "#/$defs/identifier",
+          "description": "navigate: a MurteScreenFactory key."
+        },
+        "request": {
+          "$ref": "#/$defs/identifier",
+          "description": "api: an allow-listed NamedRequest."
+        },
+        "link": {
+          "$ref": "#/$defs/identifier",
+          "description": "openURL: an allow-listed NAMED link. Not a raw URL — the identifier pattern structurally rejects 'https://...'."
+        },
+        "params": {
+          "$ref": "#/$defs/props",
+          "description": "Seeds the target's DataContext (navigate) or supplies request params (api)."
+        },
+        "onSuccess": { "$ref": "#/$defs/action" },
+        "onError": { "$ref": "#/$defs/action" }
+      },
+      "allOf": [
+        {
+          "if": { "required": ["type"], "properties": { "type": { "const": "navigate" } } },
+          "then": { "required": ["screen"] }
+        },
+        {
+          "if": { "required": ["type"], "properties": { "type": { "const": "api" } } },
+          "then": { "required": ["request"] }
+        },
+        {
+          "if": { "required": ["type"], "properties": { "type": { "const": "openURL" } } },
+          "then": { "required": ["link"] }
+        }
+      ]
+    },
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_]*$",
+      "maxLength": 128,
+      "description": "A named reference (screen key, request, link, screen name). Alphanumeric + underscore; the pattern rejects URLs, paths, and injection."
+    },
+    "typeName": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_.]*$",
+      "maxLength": 128,
+      "description": "A component type. Dots allowed for third-party namespacing, e.g. 'ext.lottie'."
+    }
+  }
+}

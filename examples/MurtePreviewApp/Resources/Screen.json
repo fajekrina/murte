@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "1.0",
+  "screen": {
+    "key": "preview",
+    "root": {
+      "type": "vstack",
+      "props": { "spacing": 16, "alignment": "leading" },
+      "children": [
+        { "type": "text", "props": { "value": "Murte Preview", "style": "title", "weight": "bold" } },
+        { "type": "text", "props": { "value": "Edit Resources/Screen.json and run again to preview your own screen.", "color": "#8E8E93" } },
+        {
+          "type": "card",
+          "props": { "background": "#EEF2FF", "cornerRadius": 16, "padding": 20 },
+          "children": [
+            { "type": "text", "props": { "value": "Account balance", "style": "caption", "color": "#4B5563" } },
+            { "type": "text", "props": { "value": "$1,240.00", "size": 34, "weight": "bold", "color": "#1D4ED8" } }
+          ]
+        },
+        {
+          "type": "hstack",
+          "props": { "spacing": 10, "alignment": "center" },
+          "children": [
+            { "type": "image", "props": { "systemName": "sparkles" } },
+            { "type": "text", "props": { "value": "Authored with the DSL or MurteStudio" } }
+          ]
+        },
+        {
+          "type": "button",
+          "props": { "title": "Get started" },
+          "action": { "type": "navigate", "screen": "next" }
+        }
+      ]
+    }
+  }
+}

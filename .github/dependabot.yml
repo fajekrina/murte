@@ -1,0 +1,28 @@
+version: 2
+updates:
+  # GitHub Actions used by the workflows above. Batched into a single PR per run.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    labels: ["ci", "dependencies"]
+    groups:
+      github-actions:
+        patterns: ["*"]
+
+  # npm dev tooling (root package.json). MurteCore is dependency-free; this keeps
+  # the build/test toolchain current.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    labels: ["dependencies"]
+    groups:
+      npm:
+        patterns: ["*"]
+
+  - package-ecosystem: npm
+    directory: /figma-plugin
+    schedule:
+      interval: weekly
+    labels: ["figma", "dependencies"]
