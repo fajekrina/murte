@@ -11,7 +11,7 @@
     "build": "esbuild src/code.ts --bundle --format=iife --target=es2017 --outfile=code.js"
   },
   "devDependencies": {
-    "@figma/plugin-typings": "^1.100.0",
+    "@figma/plugin-typings": "^1.142.0",
     "@types/node": "^20.14.0",
     "ajv": "^8.17.1",
     "esbuild": "^0.24.0",
